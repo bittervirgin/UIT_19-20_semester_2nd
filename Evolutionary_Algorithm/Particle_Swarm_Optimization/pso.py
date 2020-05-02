@@ -8,14 +8,15 @@ c1 = 1.49618
 c2 = 1.49618
 
 generation = 50
-n_particles = 32
+n_particles = 128
 d = 2
+mssv = 17520556
 def fitness_function(position):
     return position[0]**2 + position[1]**2 + 1
 
 class Particle():
     def __init__(self):
-        self.particle_num = 2
+        self.particle_num = 10
         self.position = np.array([])
         for _ in range(self.particle_num):
             self.position = np.append(self.position,((-1) ** (bool(random.getrandbits(1))) * random.random()))
@@ -139,8 +140,10 @@ class Space():
             particle.velocity = new_velocity
             particle.move()
 
-def star_topology(fitness_func):
-    random.seed(17520556)
+def star_topology(fitness_func, mssv):
+    random.seed(mssv)
+    topology = "star"
+    d = n_particles
     if fitness_func == "rastrigin":
         search_domain = [-5.12, 5.12]
     if fitness_func == "beale":
@@ -181,11 +184,18 @@ def star_topology(fitness_func):
         plt.pause(0.5)
         plt.clf()
         #print("iter", iteration)
+    with open(("{0}_{1}_{2}.txt").format(mssv, topology, d), "w") as f:
+        f.write("The best solution is: \n")
+        f.write("".join('%a' % search_space.gbest_position))
+        f.write('\n Differences between best position and global minimum \n')
+        f.write("".join('%d' % abs(search_space.gbest_value - search_space.optimal)))
     print("The best solution is: ", search_space.gbest_position, "in generation: ", iteration)
     print("Best fitness value", abs(search_space.gbest_value - search_space.optimal))
 
-def ring_topology(fitness_func):
-    random.seed(17520556)
+def ring_topology(fitness_func, mssv):
+    random.seed(mssv)
+    topology = "ring"
+    
     if fitness_func == "rastrigin":
         search_domain = [-5.12, 5.12]
     if fitness_func == "beale":
@@ -198,6 +208,7 @@ def ring_topology(fitness_func):
     particles_vector = [Particle() for _ in range(search_space.n_particles)]
     search_space.particles = particles_vector
     search_space.print_particles()
+    d = n_particles
     x_vis = np.array(search_space.gbest_position[0])
     y_vis = np.array(search_space.gbest_position[1])
     ####################################################
@@ -229,8 +240,20 @@ def ring_topology(fitness_func):
         plt.title("Generation " +  str(iteration))
         plt.pause(0.5)
         plt.clf()
+    with open(("{0}_{1}_{2}.txt").format(mssv, topology, d), "w") as f:
+        
+        f.write("The best solution is: \n")
+        f.write("".join('%a' % search_space.gbest_position))
+        f.write('\n Differences between best position and global minimum \n')
+        f.write("".join('%d' % abs(search_space.gbest_value - search_space.optimal)))
     print("The best solution is: ", search_space.gbest_position, "in n_iteration: ", iteration)
     print("Best fitness value", abs(search_space.gbest_value - search_space.optimal))       
 
 #star_topology("rastrigin")
-ring_topology("rastrigin")
+#star_topology("beale")
+#star_topology("rastrigin")
+for i in range(10): 
+    star_topology("rastrigin", mssv)
+    ring_topology("rastrigin", mssv)
+    
+    mssv += 1
