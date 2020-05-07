@@ -1,0 +1,5 @@
+﻿  Cline.cpp
+D:\IT\Computer_Graphics\Homeworks\Demo_CG\Demo_CG\Cline.cpp(45,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\IT\Computer_Graphics\Homeworks\Demo_CG\Demo_CG\Cline.cpp(58,10): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\IT\Computer_Graphics\Homeworks\Demo_CG\Demo_CG\Cline.cpp(153): warning C4717: 'Cline::MidPoint': recursive on all control paths, function will cause runtime stack overflow
+  Demo_CG.vcxproj -> D:\IT\Computer_Graphics\Homeworks\Demo_CG\Debug\Demo_CG.exe
