@@ -4,11 +4,11 @@ import random
 
 d = 40 #size of chromesome
 n = 2**5 #size of population
-mssv = 17521263
+mssv = 17520556
 class Init():
     def _init_(self):
         self.ind_size = d
-        self.pop_size = n
+        self.pop_size = 2
         self.individual = []
 
     def generate_rand_value(self):
@@ -62,16 +62,18 @@ def trap_fucn():
     return
 
 class MPRS():
-    def _init(self):
+    def _init_(self):
         self.seed = 17520556
         self.n_upper = 4
         self.n_lower = self.n_upper/2
-        self.pop_size = (self.n_upper + self.n_lower)/2
+        self.pop_size = 2
         self.fitness = 0
         self.avg_fitness = 0
-        self.success = False
-        self.population = Init().create_population(40, self.n_upper)
+        self.success = 0
+        self.population = []
     
+    def set_size(self, size):
+        self.pop_size = size
     def crossover_1x(self, individual1, individual2):
         individual1_new = individual1.copy()
         individual2_new = individual2.copy()
@@ -83,7 +85,8 @@ class MPRS():
             individual1_new[i] = individual2[i]
             individual2_new[i] = individual1[i]
         return individual1_new, individual2_new
-
+    def get_attri(self):
+        return self.pop_size
     #crossover
     def crossover_dx(self, individual1, individual2):
         crossover_rate = 1.0
@@ -97,12 +100,11 @@ class MPRS():
         
         return individual1_new, individual2_new
 
-#calculate fitness of one individual
+    #calculate fitness of one individual
     def compute_fitness(self, individual):
         return sum(gen for gen in individual)
 
-#POPOP for sGA
-#best = [] #save the highest fitness individual
+    #POPOP for sGA
     def POPOP(self, old_population):
         #Parents-Offspring Pool
         pool = []
@@ -122,7 +124,6 @@ class MPRS():
             while(compute_fitness(new_population[j]) != compute_fitness(new_population[j+1])):#condition to stop
                 self.POPOP(new_population)
         return new_population
-    #return pool
 
     def end(self, pool, k):
         best = []
@@ -135,25 +136,43 @@ class MPRS():
             
         return best
 
-
+    def set_success(self):
+        self.success = False
     def Bisection(self):
-        while (self.success == False):
+        while (self.success == 0):
+            self.n_upper = 4
             self.n_upper = self.n_upper * 2
-            population = Init().create_population(40, self.pop_size)
-            final = self.POPOP(population)
+            
+            final = self.POPOP(self.population)
             if compute_fitness(final[0]) == self.n_upper * 1:
-                success = True
+                self.success = 1
 
         while (self.n_upper - self.n_lower)/self.n_upper > 0.1:
             population = Init().create_population(40, self.pop_size)
             final = self.POPOP(population)
             if compute_fitness(final[0]) == self.n_upper * 1:
-                self.fitness = compute_fitness(final[0])
-                success = True
-            if success == True:
+                self.fitness += compute_fitness(final[0])
+                self.success = 1
+            if (self.success == 1):
                 self.n_upper = self.pop_size
             else:
                 self.n_lower = self.pop_size
             if (self.n_upper - self.n_lower) <= 2:
                 break
+    def get_n_upper(self):
+        return self.n_upper
     
+    def get_avg_fitness(self):
+        self.avg_fitness = self.fitness / 10
+        return self.avg_fitness
+    def init_population(self, seed):
+        random.seed(seed)
+        self.population = Init().create_population(40, MPRS.get_attri(self))
+init = MPRS()
+init.set_success()
+init.set_size(2)
+init.init_population(1752)
+
+
+
+
