@@ -6,20 +6,18 @@ d = 40 #size of chromesome
 n = 2**5 #size of population
 mssv = 17520556
 class Init():
-    def _init_(self):
-        self.ind_size = d
-        self.pop_size = 2
-        self.individual = []
+    def _init_(self, problem_size, pop_size):
+        self.ind_size = problem_size
+        self.pop_size = pop_size
 
     def generate_rand_value(self):
         return random.randint(0, 1)
 
-    def create_individual(self, d):
+    def create_individual(self):
         return [self.generate_rand_value for _ in range(self.ind_size)]
 
-    def create_population(self, d,n):
-        random.seed(mssv)
-        return [self.create_individual(d) for _ in range(self.pop_size)]
+    def create_population(self):
+        return [self.create_individual() for _ in range(self.pop_size)]
 
 #crossover one point
 def crossover_1x(individual1, individual2):
@@ -66,14 +64,18 @@ class MPRS():
         self.seed = 17520556
         self.n_upper = 4
         self.n_lower = self.n_upper/2
-        self.pop_size = 2
+        self.pop_size = (int)((self.n_upper + self.n_lower)/2)
         self.fitness = 0
-        self.avg_fitness = 0
+        self.avg_fitness_eval = 0
         self.success = 0
         self.population = []
     
     def set_size(self, size):
         self.pop_size = size
+
+    def set_seed(self, seed):
+        self.seed = seed
+
     def crossover_1x(self, individual1, individual2):
         individual1_new = individual1.copy()
         individual2_new = individual2.copy()
@@ -102,6 +104,7 @@ class MPRS():
 
     #calculate fitness of one individual
     def compute_fitness(self, individual):
+        self.avg_fitness_eval += 1
         return sum(gen for gen in individual)
 
     #POPOP for sGA
@@ -137,22 +140,35 @@ class MPRS():
         return best
 
     def set_success(self):
-        self.success = False
-    def Bisection(self):
+        self.success = 0
+    def Bisection1(self, seed):
+        self.set_success()
+        self.set_seed(seed)
         while (self.success == 0):
             self.n_upper = 4
             self.n_upper = self.n_upper * 2
-            
-            final = self.POPOP(self.population)
-            if compute_fitness(final[0]) == self.n_upper * 1:
-                self.success = 1
-
+            upper = self.n_upper
+            for i in range(10):
+                random.seed(self.seed + i)
+                init = Init()
+                pop = init.create_population()
+                final = self.POPOP(pop)
+                if compute_fitness(final[0]) == self.n_upper * 1:
+                    self.success = 1
+    def Bisection2(self, seed):
+        self.set_seed(seed)
+        self.set_success()
+        self.n_lower = self.n_upper / 2
         while (self.n_upper - self.n_lower)/self.n_upper > 0.1:
-            population = Init().create_population(40, self.pop_size)
-            final = self.POPOP(population)
-            if compute_fitness(final[0]) == self.n_upper * 1:
-                self.fitness += compute_fitness(final[0])
-                self.success = 1
+            self.pop_size = (int)((self.n_upper + self.n_lower) /2)
+            pop_size = self.pop_size
+            for j in range(10):
+                random.seed(self.seed + j)
+                pop = Init(10, pop_size).create_population()
+                final = self.POPOP(pop)
+                if compute_fitness(final[0]) == self.n_upper * 1:
+                    self.fitness += compute_fitness(final[0])
+                    self.success = 1
             if (self.success == 1):
                 self.n_upper = self.pop_size
             else:
@@ -160,18 +176,20 @@ class MPRS():
             if (self.n_upper - self.n_lower) <= 2:
                 break
     def get_n_upper(self):
-        return self.n_upper
+        print(self.n_upper)
+        #return self.n_upper
     
     def get_avg_fitness(self):
         self.avg_fitness = self.fitness / 10
         return self.avg_fitness
-    def init_population(self, seed):
-        random.seed(seed)
-        self.population = Init().create_population(40, MPRS.get_attri(self))
 init = MPRS()
-init.set_success()
-init.set_size(2)
-init.init_population(1752)
+mssv = 17520556
+for i in range(10):
+    init.Bisection1(mssv)
+    init.Bisection2(mssv)
+    init.set_seed(mssv + 10)
+    init.get_n_upper()
+
 
 
 
